@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 
 namespace ov {
 namespace intel_gna {
