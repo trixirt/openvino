@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 # Copyright (C) 2018-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
@@ -100,71 +100,107 @@ if [ -f /etc/lsb-release ]; then
         sudo -E apt-get install -y nlohmann-json-dev
     fi
 elif [ -f /etc/redhat-release ]; then
-    # RHEL 8
     sudo -E yum install -y centos-release-scl epel-release
-    sudo -E yum install -y \
-            wget \
-            tar \
-            xz \
-            p7zip \
-            rpm-build \
-            unzip \
-            yum-plugin-ovl \
-            which \
-            libssl-dev \
-            ca-certificates \
-            git \
-            git-lfs \
-            boost-devel \
-            libtool \
-            gcc \
-            gcc-c++ \
-            make \
-            patchelf \
-            pkg-config \
-            gflags-devel.i686 \
-            zlib-devel.i686 \
-            glibc-static \
-            glibc-devel \
-            libstdc++-static \
-            libstdc++-devel \
-            libstdc++ libgcc \
-            glibc-static.i686 \
-            glibc-devel.i686 \
-            libstdc++-static.i686 \
-            libstdc++.i686 \
-            libgcc.i686 \
-            libusbx-devel \
-            openblas-devel \
-            libusbx-devel \
-            gstreamer1 \
-            gstreamer1-plugins-base
+    P8="boost-devel \
+       ca-certificates \
+       gcc \
+       gcc-c++ \
+       gflags-devel.i686 \
+       git \
+       git-lfs \
+       glibc-devel \
+       glibc-devel.i686 \
+       glibc-static \
+       glibc-static.i686 \
+       gstreamer1 \
+       gstreamer1-plugins-base \
+       libgcc.i686 \
+       libssl-dev \
+       libstdc++-devel \
+       libstdc++.i686 \
+       libstdc++ libgcc \
+       libstdc++-static \
+       libstdc++-static.i686 \
+       libtool \
+       libusbx-devel \
+       libusbx-devel \
+       make \
+       openblas-devel \
+       p7zip \
+       patchelf \
+       pkg-config \
+       rpm-build \
+       tar \
+       unzip \
+       wget \
+       which \
+       xz \
+       yum-plugin-ovl \
+       zlib-devel.i686"
 
-    # Python 3.7 for Model Optimizer
-    sudo -E yum install -y rh-python37
-    source scl_source enable rh-python37
+    P9="boost-devel \
+       ca-certificates \
+       gcc \
+       gcc-c++ \
+       gflags-devel \
+       git \
+       git-lfs \
+       glibc-devel \
+       gstreamer1 \
+       gstreamer1-plugins-base \
+       openssl-devel \
+       libstdc++-devel \
+       libtool \
+       libusbx-devel \
+       libusbx-devel \
+       make \
+       openblas-devel \
+       p7zip \
+       patchelf \
+       pkg-config \
+       rpm-build \
+       tar \
+       unzip \
+       wget \
+       which \
+       xz \
+       zlib-devel"
 
-    echo
-    echo "FFmpeg is required for processing audio and video streams with OpenCV. Please select your preferred method for installing FFmpeg:"
-    echo
-    echo "Option 1: Allow installer script to add a third party repository, Nux Dextop (http://li.nux.ro/repos.html), which contains FFmpeg. FFmpeg rpm package will be installed from this repository. "
-    echo "WARNING: This repository is NOT PROVIDED OR SUPPORTED by CentOS."
-    echo "Once added, this repository will be enabled on your operating system and can thus receive updates to all packages installed from it. "
-    echo
-    echo "Consider the following ways to prevent unintended 'updates' from this third party repository from over-writing some core part of CentOS:"
-    echo "a) Only enable these archives from time to time, and generally leave them disabled. See: man yum"
-    echo "b) Use the exclude= and includepkgs= options on a per sub-archive basis, in the matching .conf file found in /etc/yum.repos.d/ See: man yum.conf"
-    echo "c) The yum Priorities plug-in can prevent a 3rd party repository from replacing base packages, or prevent base/updates from replacing a 3rd party package."
-    echo
-    echo "Option 2: Skip FFmpeg installation."
-    echo
-
-    if yes_or_no; then
-        sudo -E rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm
-        sudo -E yum install -y ffmpeg
+    grep Plow /etc/redhat-release &> /dev/null
+    if [ $? = 0 ]; then
+	RHEL9=1
+    fi
+    if [ x$RHEL9 = x1 ]; then
+	yum install -y $P9
     else
-        echo "FFmpeg installation skipped. You may build FFmpeg from sources as described here: https://trac.ffmpeg.org/wiki/CompilationGuide/Centos"
-        echo
+	yum install -y $P8
+           
+	# Python 3.7 for Model Optimizer
+	sudo -E yum install -y rh-python37
+	source scl_source enable rh-python37
+
+	echo
+	echo "FFmpeg is required for processing audio and video streams with OpenCV. Please select your preferred method for installing FFmpeg:"
+	echo
+	echo "Option 1: Allow installer script to add a third party repository, Nux Dextop (http://li.nux.ro/repos.html), which contains FFmpeg. FFmpeg rpm package will be installed from this repository. "
+	echo "WARNING: This repository is NOT PROVIDED OR SUPPORTED by CentOS."
+	echo "Once added, this repository will be enabled on your operating system and can thus receive updates to all packages installed from it. "
+	echo
+	echo "Consider the following ways to prevent unintended 'updates' from this third party repository from over-writing some core part of CentOS:"
+	echo "a) Only enable these archives from time to time, and generally leave them disabled. See: man yum"
+	echo "b) Use the exclude= and includepkgs= options on a per sub-archive basis, in the matching .conf file found in /etc/yum.repos.d/ See: man yum.conf"
+	echo "c) The yum Priorities plug-in can prevent a 3rd party repository from replacing base packages, or prevent base/updates from replacing a 3rd party package."
+	echo
+	echo "Option 2: Skip FFmpeg installation."
+	echo
+
+	if yes_or_no; then
+            sudo -E rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm
+            sudo -E yum install -y ffmpeg
+	else
+            echo "FFmpeg installation skipped. You may build FFmpeg from sources as described here: https://trac.ffmpeg.org/wiki/CompilationGuide/Centos"
+            echo
+	fi
     fi
 elif [ -f /etc/os-release ] && grep -q "raspbian" /etc/os-release; then
     # Raspbian

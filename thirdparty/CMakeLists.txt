@@ -171,10 +171,10 @@ ov_install_static_lib(fluid ${OV_CPACK_COMP_CORE})
 # Gflags
 #
 
-if(NOT APPLE)
+#if(NOT APPLE)
     # on Apple only dynamic libraries are available
-    find_package(gflags QUIET COMPONENTS nothreads_static)
-endif()
+#    find_package(gflags QUIET COMPONENTS nothreads_static)
+#endif()
 
 if(gflags_FOUND)
     if(TARGET gflags_nothreads-static)
